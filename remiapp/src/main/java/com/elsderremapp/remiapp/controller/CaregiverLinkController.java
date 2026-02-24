@@ -16,15 +16,6 @@ public class CaregiverLinkController {
 
     private final CaregiverLinkService caregiverLinkService;
 
-    @PostMapping
-    public ResponseEntity<CaregiverLinkResponseDTO> createLink(
-            @RequestBody CaregiverLinkRequestDTO dto) {
-
-        return ResponseEntity.ok(
-                caregiverLinkService.createLink(dto)
-        );
-    }
-
     @GetMapping("/elder/{elderId}")
     public ResponseEntity<List<CaregiverLinkResponseDTO>>
     getCaregiversForElder(@PathVariable Long elderId) {

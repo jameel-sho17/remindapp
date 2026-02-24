@@ -21,44 +21,6 @@ public class CaregiverLinkService {
     private final CaregiverLinkRepository caregiverLinkRepository;
     private final UserRepository userRepository;
 
-    public CaregiverLinkResponseDTO createLink(
-            CaregiverLinkRequestDTO dto) {
-
-        User elder = userRepository.findById(dto.getElderId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Elder not found"));
-
-        User caregiver = userRepository.findById(dto.getCaregiverId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Caregiver not found"));
-
-        //  Role validation
-        if (elder.getRole() != Role.ELDER) {
-            throw new BadRequestException("User is not an elder");
-        }
-
-        if (caregiver.getRole() != Role.CAREGIVER) {
-            throw new BadRequestException("User is not a caregiver");
-        }
-
-        //  Prevent duplicate link
-        caregiverLinkRepository
-                .findByElderAndCaregiver(elder, caregiver)
-                .ifPresent(link -> {
-                    throw new BadRequestException("Link already exists");
-                });
-
-        CaregiverLink link = CaregiverLink.builder()
-                .elder(elder)
-                .caregiver(caregiver)
-                .linkedAt(LocalDateTime.now())
-                .build();
-
-        caregiverLinkRepository.save(link);
-
-        return mapToResponse(link);
-    }
-
     public List<CaregiverLinkResponseDTO> getCaregiversForElder(Long elderId) {
 
         User elder = userRepository.findById(elderId)

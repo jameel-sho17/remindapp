@@ -1,6 +1,7 @@
 package com.elsderremapp.remiapp.controller;
 
 
+import com.elsderremapp.remiapp.dto.UserRequestDTO;
 import com.elsderremapp.remiapp.dto.UserResponseDTO;
 import com.elsderremapp.remiapp.model.User;
 import com.elsderremapp.remiapp.service.UserService;
@@ -16,22 +17,21 @@ import java.util.List;
 @RequiredArgsConstructor
 
 public class UserController {
-    @Autowired
     private final UserService userService;
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return userService.registerUser(user);
+    public UserResponseDTO registerUser(@RequestBody UserRequestDTO request) {
+        return userService.registerUser(request);
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public UserResponseDTO getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
-    @GetMapping("/allusers")
-    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
 
+    @GetMapping("/allusers")
+    public List<UserResponseDTO> getAllUsers() {
+        return userService.getAllUsers();
+    }
 
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.elsderremapp.remiapp.model.User;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 
@@ -31,4 +32,8 @@ public class Medicine {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
 }
