@@ -1,32 +1,87 @@
-# 🩺 ElderCare – Medicine Reminder & Caregiver Management System
+# 🩺 ElderCare Backend System
+
+### Secure Elder–Caregiver Management & Medicine Reminder API
+
+---
 
 ## 📌 Project Overview
 
-ElderCare is a Spring Boot backend application designed to help elders manage their medicines, health data, and securely connect with caregivers using a time-limited invite system.
+ElderCare is a backend REST API system built using Spring Boot that enables secure management of elder–caregiver relationships, medicine reminders, and health tracking.
 
-The system ensures secure linking between elders and caregivers while providing medicine reminders and health tracking.
+The application is designed using layered architecture principles and focuses on secure relationship linking via time-limited invite codes.
 
-This project follows a layered architecture and is designed to be scalable for future mobile/web integration.
-
----
-
-# 🎯 Core Objectives
-
-* Allow elders to manage medicine schedules
-* Allow caregivers to monitor elders
-* Secure caregiver-elder connection using invite codes
-* Track reminder logs (taken/missed)
-* Store health metrics
-* Maintain clean, scalable backend architecture
+This project demonstrates backend design, business rule enforcement, entity relationships, and scalable architecture planning.
 
 ---
 
-# 🏗️ Architecture Overview
+# 🎯 Core Features
 
-The project follows **Layered Architecture**:
+## 👤 User Management
+
+* Register users with role: `ELDER` or `CAREGIVER`
+* Role-based validation
+* Structured DTO-based request/response handling
+* Global exception handling
+
+---
+
+## 🔐 Secure Invite-Based Linking System
+
+Instead of direct relationship creation, the system enforces secure linking:
+
+### Workflow
+
+1️⃣ Elder generates time-limited invite code
+2️⃣ Code stored with expiration & unused status
+3️⃣ Caregiver connects using the invite code
+4️⃣ System validates:
+
+* Code exists
+* Code not expired
+* Code not already used
+* User role is CAREGIVER
+* No duplicate connection
+
+5️⃣ Relationship stored in caregiver_link table
+6️⃣ Invite code marked as used
+
+This ensures controlled and secure caregiver-elder connection.
+
+---
+
+## 💊 Medicine Management
+
+* Add medicines for elders
+* Configure dosage and frequency
+* Link medicines to specific elder accounts
+
+---
+
+## ⏰ Reminder Tracking System
+
+* Auto-generated reminder logs
+* Track medicine adherence
+* Mark reminders as TAKEN
+* Historical tracking capability
+
+---
+
+## ❤️ Health Data Management
+
+* Store blood pressure
+* Store sugar level
+* Store weight
+* Retrieve elder health history
+* Linked caregiver visibility
+
+---
+
+# 🏗️ Architecture
+
+This project follows Clean Layered Architecture:
 
 ```
-Controller Layer → Service Layer → Repository Layer → Database
+Controller → Service → Repository → Database
 ```
 
 ### 📂 Package Structure
@@ -40,115 +95,20 @@ dto/
 exception/
 ```
 
-### Responsibilities
+### Architectural Highlights
 
-* **Controller** → Handles HTTP requests
-* **Service** → Contains business logic
-* **Repository** → Database interaction (JPA)
-* **DTO** → Secure request/response transfer
-* **Exception** → Centralized error handling
-
----
-
-# 🔄 Complete Project Workflow
-
-## 1️⃣ User Registration Flow
-
-### Step 1: Register Elder
-
-* Role: `ELDER`
-* Stored in users table
-
-### Step 2: Register Caregiver
-
-* Role: `CAREGIVER`
-* Stored in users table
-
-Validation:
-
-* Role-based validation enforced
-* Duplicate email prevented
+* Separation of concerns
+* DTO usage to prevent entity exposure
+* Centralized exception handling
+* Business rule validation inside service layer
+* JPA entity relationship mapping
+* Scalable API design
 
 ---
 
-## 2️⃣ Caregiver Connection Workflow (Secure Invite System)
+# 🗄️ Database Design
 
-### Step 1: Elder Generates Invite Code
-
-* System generates unique code
-* Code has expiration time
-* Code stored in invite_code table
-* Code initially marked as `unused`
-
-### Step 2: Caregiver Connects Using Code
-
-System validates:
-
-* Code exists
-* Code not expired
-* Code not already used
-* Caregiver exists
-* User role = CAREGIVER
-* No duplicate link
-
-If valid:
-
-* Create entry in caregiver_link table
-* Mark invite code as used
-
-This ensures:
-
-* Secure and controlled relationship
-* No unauthorized linking
-
----
-
-## 3️⃣ Medicine Management Workflow
-
-Elder can:
-
-* Add medicine
-* Set dosage
-* Set frequency
-* Set start and end dates
-
-Medicine stored in `medicine` table linked to elder.
-
----
-
-## 4️⃣ Reminder System Workflow
-
-When medicine is added:
-
-* System generates reminder entries
-* Reminders stored in reminder_log table
-* Status: `PENDING`
-
-Caregiver or elder can:
-
-* Mark reminder as `TAKEN`
-
-This enables tracking adherence.
-
----
-
-## 5️⃣ Health Data Tracking Workflow
-
-Elder can:
-
-* Add blood pressure
-* Add sugar level
-* Add weight
-
-Health data stored in `health_data` table linked to elder.
-
-Caregiver can view elder’s health history.
-
----
-
-# 🗄️ Database Relationships
-
-## Users
+### Users
 
 * id
 * name
@@ -156,37 +116,37 @@ Caregiver can view elder’s health history.
 * password
 * role (ELDER / CAREGIVER)
 
-## Invite Code
+### Invite Code
 
 * id
 * code
 * expires_at
 * used
-* elder_id (FK → users)
+* elder_id (FK)
 
-## Caregiver Link
+### Caregiver Link
 
 * id
-* elder_id (FK → users)
-* caregiver_id (FK → users)
+* elder_id (FK)
+* caregiver_id (FK)
 * linked_at
 
-## Medicine
+### Medicine
 
 * id
 * name
 * dosage
 * frequency
-* elder_id (FK → users)
+* elder_id (FK)
 
-## Reminder Log
+### Reminder Log
 
 * id
 * medicine_id (FK)
-* status
 * scheduled_time
+* status
 
-## Health Data
+### Health Data
 
 * id
 * elder_id (FK)
@@ -196,129 +156,85 @@ Caregiver can view elder’s health history.
 
 ---
 
-# 🛡️ Security Design (Planned Implementation)
+# 🛡️ Security Design (Planned Enhancements)
 
-Currently:
-
-* Basic validation implemented
-
-Future Security Enhancements:
+Although current version focuses on business logic validation, the architecture is prepared for:
 
 ## 🔐 JWT Authentication
 
 * Login endpoint
-* Generate JWT token
-* Token required for API access
-* Stateless authentication
+* Stateless token-based authentication
+* Secure API access
 
 ## 🔒 Role-Based Authorization
 
-* ELDER → Manage own medicines & health
-* CAREGIVER → View linked elders only
-* Admin (optional future role)
+* ELDER → Manage own data
+* CAREGIVER → Access only linked elders
+* Endpoint-level access control
 
 ## 🔑 Password Encryption
 
-* Use BCryptPasswordEncoder
-* Store hashed passwords only
-
-## 🚫 Endpoint Protection
-
-* Secure endpoints using Spring Security
-* Prevent unauthorized access
+* BCrypt hashing before database storage
 
 ---
 
-# 🌐 Future Enhancements
+# 🔔 Firebase Integration (Planned Enhancement)
 
-## 1️⃣ Frontend Integration
+Future integration with **Firebase Cloud Messaging (FCM)** to enable:
 
-Planned:
+* Real-time medicine reminder notifications
+* Push notifications to caregivers
+* Emergency health alerts
+* Missed-dose alerts
 
-* React.js Web Dashboard
-* Mobile app (Flutter / React Native)
+### Planned Architecture
 
-Features:
+Spring Boot Backend → Firebase Cloud Messaging → React Native Mobile App
+
+Firebase will act as a notification gateway while Spring Boot remains the primary business logic engine.
+
+---
+
+# 🌐 Frontend Integration (Planned)
+
+This backend system is designed to integrate with:
+
+* React Native mobile application
+* React.js web dashboard
+
+Planned frontend features:
 
 * Elder dashboard
-* Caregiver dashboard
-* Real-time reminder tracking
-* Graphical health reports
+* Caregiver monitoring panel
+* Real-time health charts
+* Reminder tracking UI
+* Notification display
+
+The backend APIs are fully REST-compliant and frontend-ready.
 
 ---
 
-## 2️⃣ OCR Medicine Scanner (Advanced Feature)
+# 🚀 How to Run
 
-Future feature:
+1️⃣ Configure MySQL database
+2️⃣ Update `application.properties`
 
-* Upload prescription image
-* Extract medicine names using OCR (Tesseract / Google Vision API)
-* Auto-fill medicine form
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/elder_app
+spring.datasource.username=root
+spring.datasource.password=your_password
 
-Workflow:
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
 
-1. Upload image
-2. OCR extracts text
-3. Parse medicine names
-4. Suggest medicines automatically
-
----
-
-## 3️⃣ Email Invite Integration
-
-Instead of manual code sharing:
-
-* Elder enters caregiver email
-* System sends invite link via email
-* One-click connection
-
----
-
-## 4️⃣ Notification System
-
-* SMS reminders
-* Push notifications
-* Email reminders
-
----
-
-## 5️⃣ Production Deployment
-
-Planned:
-
-* Docker containerization
-* AWS / Azure deployment
-* CI/CD pipeline
-* Cloud database
-
----
-
-# 🧪 Testing Strategy
-
-Manual Testing:
-
-* Postman API testing
-* Positive & negative test cases
-
-Future:
-
-* JUnit unit tests
-* Integration tests
-* Swagger API documentation
-
----
-
-# 🚀 How To Run
-
-1. Configure MySQL database
-2. Update application.properties
-3. Run:
+3️⃣ Run:
 
 ```
 mvn spring-boot:run
 ```
 
-Server:
+Server runs on:
 
 ```
 http://localhost:8080
@@ -326,39 +242,30 @@ http://localhost:8080
 
 ---
 
+# 🧪 Testing
+
+* Postman API testing
+* Positive and negative validation cases
+* Business rule verification
+* Invite expiration handling
+* Duplicate prevention testing
+
+---
+
 # 📈 Scalability Vision
 
 This project is designed to evolve into:
 
-* Full-stack healthcare monitoring system
-* Multi-elder caregiver management
-* AI-powered health prediction
-* Real-time analytics dashboard
-
----
-
-# 👨‍💻 Developer Notes
-
-This project demonstrates:
-
-* Clean layered architecture
-* Proper DTO usage
-* Entity relationships
-* Exception handling
-* Secure invite-based linking system
-* Scalable backend design
+* Secure production-grade healthcare support platform
+* Mobile-enabled elder monitoring system
+* Push-notification driven reminder engine
+* JWT-secured multi-user system
+* Cloud-deployed microservice-ready backend
 
 ---
 
 # 🏁 Conclusion
 
-ElderCare backend provides a strong foundation for a secure and scalable elder health monitoring system.
+ElderCare Backend System is a structured, scalable, and security-focused Spring Boot application designed to manage elder-caregiver relationships and health monitoring workflows.
 
-With future implementation of:
-
-* JWT Security
-* Frontend dashboard
-* OCR integration
-* Cloud deployment
-
-This project can evolve into a production-ready healthcare support platform.
+The system emphasizes clean architecture, secure invite-based linking, and future extensibility with JWT security and Firebase notification services.
